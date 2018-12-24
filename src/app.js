@@ -29,7 +29,7 @@ class Menu extends React.Component {
   render() {
     return (
       <div>
-        <Link to='/'>Hjem</Link> <Link to='/tur'>Tur</Link> <Link to='/utstyr'>Utstyr</Link> <Link to='/sted'>Skiløyper</Link> 
+        <Link to='/'>Hjem</Link> <Link to='/tur'>Tur</Link> <Link to='/utstyr'>Utstyr</Link> <Link to='/sted'>Skiløyper</Link>
       </div>
     );
   }
@@ -373,7 +373,6 @@ class Hjem extends React.Component {
     super();
     this.sesong = [];
     this.vaer = [];
-    this.skipar = [];
     this.total = [];
     this.skis = [];
   }
@@ -450,25 +449,18 @@ class Hjem extends React.Component {
     }).catch((error) => {
       errorMessage.set('Failed to get weather average: ' + error);
     });
-    service.getTopSkipar().then((result) => {
-      this.skipar = result;
-      console.log(this.skipar);
-      this.forceUpdate();
-    }).catch((error) => {
-      errorMessage.set('Failed to get top skis: ' + error);
-    });
     service.getTotal().then((result) => {
       this.total = result[0];
       console.log(this.total);
       this.forceUpdate();
     }).catch((error) => {
-      errorMessage.set('Failed to get top skis: ' + error);
+      errorMessage.set('Failed to get total km: ' + error);
     });
     service.getTopSkipar().then((result) => {
       this.skis = result;
       this.forceUpdate();
     }).catch((error) => {
-      errorMessage.set('Failed to get skis: ' + error);
+      errorMessage.set('Failed to get top skis: ' + error);
     });
   }
 }
