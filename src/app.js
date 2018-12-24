@@ -105,7 +105,6 @@ class Tur extends React.Component {
         <ul>{listItems}</ul>
         <b>Ny skitur:</b>
         <div>
-          Skipar: <select ref='par'><option value='0'>Velg skipar</option>{skipar}</select> <br/>
         <table>
         <tbody>
           <tr>
