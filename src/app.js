@@ -29,7 +29,7 @@ class Menu extends React.Component {
   render() {
     return (
       <div>
-        Menu: <Link to='/'>Hjem</Link> <Link to='/tur'>Tur</Link> <Link to='/utstyr'>Utstyr</Link> <Link to='/sted'>Skiløyper</Link> <Link to='/info'>Info</Link>
+        <Link to='/'>Hjem</Link> <Link to='/tur'>Tur</Link> <Link to='/utstyr'>Utstyr</Link> <Link to='/sted'>Skiløyper</Link> <Link to='/info'>Info</Link>
       </div>
     );
   }
@@ -63,7 +63,7 @@ class Tur extends React.Component {
     for(let trip of this.trips) {
       listItems.push(
         <li key={trip.tur_id}>
-          <Link to={'/tur/' + trip.tur_id}>{trip.dato.toLocaleDateString()}</Link>
+          <Link to={'/tur/' + trip.tur_id}>{trip.dato.toLocaleDateString()}, {trip.sted_navn}</Link>
         </li>
       );
     }
@@ -105,19 +105,45 @@ class Tur extends React.Component {
         <ul>{listItems}</ul>
         <b>Ny skitur:</b>
         <div>
-          Sted: <select ref='loype'><option value='0'>Velg sted</option>{sted}</select> <br/>
-          Lengde: <input type='number' ref='lengde' /> i km.<br/>
-          Dato: <input type='date' ref='dato' /> <br/>
           Skipar: <select ref='par'><option value='0'>Velg skipar</option>{skipar}</select> <br/>
-          Skismurning: <select ref='smor'><option value='0'>Velg skismurning</option>{skismurning}</select> <br/>
-          Temperatur: <input type='number' ref='temp' /> i °C. <br/>
-          Nedbør: <input type='number' ref='nedbormm' /> i mm.<br/>
-          Vindstyrke: <input type='number' ref='vind' /> i mps. <br/>
-          Skylag: <select ref='sky'><option value='0'>Velg skylag</option>{skylag}</select> <br/>
-          Nedbørstype: <select ref='ned'><option value='0'>Velg nedbørstype</option>{nedborstype}</select> <br/>
+        <table>
+        <tbody>
+          <tr>
+            <td>Sted:</td>
+            <td> <select ref='loype'><option value='0'>Velg sted</option>{sted}</select> </td>
+          </tr>
+          <tr>
+          <td>Lengde: </td><td><input type='number' ref='lengde' /> i km. </td>
+          </tr>
+          <tr>
+          <td>Dato: </td><td> <input type='date' ref='dato' /> </td>
+          </tr>
+          <tr>
+          <td>Skipar: </td><td><select ref='par'><option value='0'>Velg skipar</option>{skipar}</select> </td>
+          </tr>
+          <tr>
+          <td>Skismurning: </td><td> <select ref='smor'><option value='0'>Velg skismurning</option>{skismurning}</select> </td>
+          </tr>
+          <tr>
+          <td>Temperatur: </td><td> <input type='number' ref='temp' /> i °C. </td>
+          </tr>
+          <tr>
+          <td>Nedbør: </td><td> <input type='number' ref='nedbormm' /> i mm.</td>
+          </tr>
+          <tr>
+          <td>Vindstyrke: </td><td> <input type='number' ref='vind' /> i mps. </td>
+          </tr>
+          <tr>
+          <td>Skylag: </td><td> <select ref='sky'><option value='0'>Velg skylag</option>{skylag}</select> </td>
+          </tr>
+          <tr>
+          <td>Nedbørstype: </td><td> <select ref='ned'><option value='0'>Velg nedbørstype</option>{nedborstype}</select> </td>
+          </tr>
+        </tbody>
+        </table>
 
           <button onClick={ () => {
-            console.log(this.refs.loype.value);
+            console.log(this.refs.loype.value, this.refs.lengde.value, this.refs.dato.value, this.refs.par.value, this.refs.smor.value, this.refs.temp.value, this.refs.nedbormm.value, this.refs.vind.value, this.refs.sky.value, this.refs.ned.value);
           }}>Legg til</button>
         </div>
       </div>
@@ -271,6 +297,9 @@ class Utstyr extends React.Component {
   constructor() {
     super();
     this.skis = [];
+    this.brands = [];
+    this.types = [];
+    this.styles = [];
   }
   render() {
     let listItems = [];
@@ -279,13 +308,40 @@ class Utstyr extends React.Component {
         <li key={ski.skipar_id}>{ski.skipar_navn} </li>
       );
     }
+    let merke = [];
+    let skitype = [];
+    let stil = [];
+    for (let brand of this.brands) {
+      merke.push(
+        <option key={brand.skimerke_id} value={brand.skimerke_id}>{brand.skimerke_navn}</option>
+      );
+    }
+    for (let type of this.types) {
+      skitype.push(
+        <option key={type.skitype_id} value={type.skitype_id}>{type.skitype_navn}</option>
+      );
+    }
+    for (let style of this.styles) {
+      stil.push(
+        <option key={style.langrennstype_id} value={style.langrennstype_id}>{style.langrennstype_navn}</option>
+      );
+    }
+
     return(
       <div>
       <h3>Utstyr</h3>
       <b>Mine skipar:</b>
-      <ol>
+      <ul>
       {listItems}
-      </ol>
+      </ul>
+      <br/> <b>Legg til nytt skipar: </b> <br/>
+      Skiparnavn: <input type='text' ref='newSkiName'/>
+      <br/> <select ref='newBrand'><option value='0'>Skimerke</option>{merke}</select>
+      <select ref='newType'><option value='0'>Skitype</option>{skitype}</select>
+      <select ref='newStyle'><option value='0'>Langrennstype</option>{stil}</select>
+      <br/><button ref='newSkiButton' onClick={ () => {
+        console.log(this.refs.newSkiName.value, this.refs.newBrand.value, this.refs.newType.value, this.refs.newStyle.value);
+      }}>Lagre</button>
       </div>
     );
   }
@@ -296,16 +352,60 @@ class Utstyr extends React.Component {
     }).catch((error) => {
       errorMessage.set('Failed to get skis: ' + error);
     });
+    service.getSkimerke().then((result) => {
+      this.brands = result;
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get brands: ' + error);
+    });
+    service.getSkitype().then((result) => {
+      this.types = result;
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get types: ' + error);
+    });
+    service.getLangrennstype().then((result) => {
+      this.styles = result;
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get styles: ' + error);
+    });
   }
 }
 class Info extends React.Component {
   constructor() {
     super();
+    this.sesong = [];
+    this.vaer = [];
+    this.skipar = [];
   }
   render() {
     return(
       <div>info</div>
     );
+  }
+  componentDidMount(){
+    service.getSesongTotal().then((result) => {
+      this.sesong = result;
+      console.log(this.sesong);
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get season total: ' + error);
+    });
+    service.getAvgVaer().then((result) => {
+      this.vaer = result;
+      console.log(this.vaer);
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get weather average: ' + error);
+    });
+    service.getTopSkipar().then((result) => {
+      this.skipar = result;
+      console.log(this.skipar);
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get top skis: ' + error);
+    });
   }
 }
 
@@ -321,7 +421,6 @@ ReactDOM.render((
         <Route exact path='/sted' component={Sted} />
         <Route exact path='/utstyr' component={Utstyr} />
         <Route exact path='/info' component={Info} />
-
         <Route exact path='/tur/:turId' component={TurDetails} />
       </Switch>
     </div>

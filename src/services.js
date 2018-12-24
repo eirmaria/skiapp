@@ -27,38 +27,7 @@ function connect() {
 }
 connect();
 
-// Class that performs database queries related to customers
 class Service {
-  getCustomers(callback) {
-    connection.query('SELECT * FROM Customers', (error, result) => {
-      if (error) throw error;
-
-      callback(result);
-    });
-  }
-
-  getCustomer(id, callback) {
-    connection.query('SELECT * FROM Customers WHERE id=?', [id], (error, result) => {
-      if (error) throw error;
-
-      callback(result[0]);
-    });
-  }
-
-  addCustomer(firstName, city, callback) {
-    connection.query('INSERT INTO Customers (firstName, city) values (?, ?)', [firstName, city], (error, result) => {
-      if (error) throw error;
-
-      callback();
-    });
-  }
-  // getTur(callback) {
-  //   connection.query('SELECT t.tur_id, t.dato, t.lengde, s.sted_navn, p.skipar_navn, m.skismurning_navn, t.kommentar, v.temperatur, v.nedbor_mm, v.vindstyrke_mps, n.nedbortype_navn, y.skylag_navn FROM ((((((TUR t INNER JOIN VAER v ON v.tur_id = t.tur_id) INNER JOIN STED s ON s.sted_id = t.sted_id) INNER JOIN SKIPAR p ON p.skipar_id = t.skipar_id) INNER JOIN SKISMURNING m ON m.skismurning_id = t.skismurning_id) INNER JOIN NEDBORTYPE n ON n.nedbortype_id = v.nedbortype_id) INNER JOIN SKYLAG y ON y.skylag_id = v.skylag_id)', (error, result) => {
-  //     if(error) throw error;
-  //     callback(result);
-  //     console.log(result);
-  //   });
-  // }
   getTur() {
     return new Promise((resolve, reject) => {
       connection.query('SELECT t.tur_id, t.dato, t.lengde, s.sted_navn, t.sted_id, p.skipar_navn, t.skipar_id, m.skismurning_navn, t.skismurning_id, t.kommentar, v.temperatur, v.nedbor_mm, v.vindstyrke_mps, n.nedbortype_navn, v.nedbortype_id, y.skylag_navn, v.skylag_id FROM ((((((TUR t INNER JOIN VAER v ON v.tur_id = t.tur_id) INNER JOIN STED s ON s.sted_id = t.sted_id) INNER JOIN SKIPAR p ON p.skipar_id = t.skipar_id) INNER JOIN SKISMURNING m ON m.skismurning_id = t.skismurning_id) INNER JOIN NEDBORTYPE n ON n.nedbortype_id = v.nedbortype_id) INNER JOIN SKYLAG y ON y.skylag_id = v.skylag_id)', (error, result) => {
