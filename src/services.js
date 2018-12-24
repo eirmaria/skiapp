@@ -155,7 +155,7 @@ class Service {
   }
   getTotal() {
     return new Promise((resolve, reject) => {
-      connection.query('SELECT SUM(lengde) FROM TUR', (error, result) => {
+      connection.query('SELECT SUM(lengde) as total FROM TUR', (error, result) => {
         if (error) {
           reject(error);
           return;

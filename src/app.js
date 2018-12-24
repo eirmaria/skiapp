@@ -29,21 +29,21 @@ class Menu extends React.Component {
   render() {
     return (
       <div>
-        <Link to='/'>Hjem</Link> <Link to='/tur'>Tur</Link> <Link to='/utstyr'>Utstyr</Link> <Link to='/sted'>Skiløyper</Link> <Link to='/info'>Info</Link>
+        <Link to='/'>Hjem</Link> <Link to='/tur'>Tur</Link> <Link to='/utstyr'>Utstyr</Link> <Link to='/sted'>Skiløyper</Link> 
       </div>
     );
   }
 }
 
-class Hjem extends React.Component {
-  render() {
-    return (
-      <div>
-        Hjemmeside
-      </div>
-    );
-  }
-}
+// class Hjem extends React.Component {
+//   render() {
+//     return (
+//       <div>
+//         Hjemmeside
+//       </div>
+//     );
+//   }
+// }
 
 
 class Tur extends React.Component {
@@ -193,8 +193,6 @@ class Tur extends React.Component {
   // console.log(this.refs.loype.value);
   // }
 }
-
-// Detailed view of one customer
 class TurDetails extends React.Component {
   constructor(props) {
     super(props); // Call React.Component constructor
@@ -243,7 +241,6 @@ class TurDetails extends React.Component {
     });
   }
 }
-
 class Sted extends React.Component {
   constructor() {
     super();
@@ -371,21 +368,76 @@ class Utstyr extends React.Component {
     });
   }
 }
-class Info extends React.Component {
+class Hjem extends React.Component {
   constructor() {
     super();
     this.sesong = [];
     this.vaer = [];
     this.skipar = [];
+    this.total = [];
+    this.skis = [];
   }
   render() {
+    let listItems = [];
+    for (let ski of this.skis) {
+      listItems.push(
+        <li key={ski.skipar_id}>{ski.skipar_navn}, antall skiturer: {ski.antall}.</li>
+      );
+    }
+    let vaerTable = [];
+    for (let v of this.vaer) {
+      vaerTable.push(
+        <tr>
+        <td>{v.sted}</td>
+        <td>{v.nedbor}</td>
+        <td>{v.temperatur}</td>
+        <td>{v.vindstyrke}</td>
+        </tr>
+      );
+    }
     return(
-      <div>info</div>
+      <div>
+
+      <h1>Totalt antall kilometer gått på ski: {this.total.total} km!</h1>
+
+      <table>
+      <tbody>
+      <tr>
+      <td>November</td>
+      <td>Desember</td>
+      <td>Januar</td>
+      <td>Februar</td>
+      </tr>
+      <tr>
+      <td>{this.sesong.November}</td>
+      <td>{this.sesong.Desember}</td>
+      <td>{this.sesong.Januar}</td>
+      <td>{this.sesong.Februar}</td>
+      </tr>
+      </tbody>
+      </table>
+      <br/>
+      <b>Mest populære skipar:</b>
+      <ol>{listItems}</ol>
+
+      <b>Gjennomsnittsvær:</b>
+      <table>
+      <tbody>
+      <tr>
+      <td>Sted</td>
+      <td>Nedbør</td>
+      <td>Temperatur</td>
+      <td>Vindstyrke</td>
+      </tr>
+      {vaerTable}
+      </tbody>
+      </table>
+      </div>
     );
   }
   componentDidMount(){
     service.getSesongTotal().then((result) => {
-      this.sesong = result;
+      this.sesong = result[0];
       console.log(this.sesong);
       this.forceUpdate();
     }).catch((error) => {
@@ -405,6 +457,19 @@ class Info extends React.Component {
     }).catch((error) => {
       errorMessage.set('Failed to get top skis: ' + error);
     });
+    service.getTotal().then((result) => {
+      this.total = result[0];
+      console.log(this.total);
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get top skis: ' + error);
+    });
+    service.getTopSkipar().then((result) => {
+      this.skis = result;
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get skis: ' + error);
+    });
   }
 }
 
@@ -419,7 +484,6 @@ ReactDOM.render((
         <Route exact path='/tur' component={Tur} />
         <Route exact path='/sted' component={Sted} />
         <Route exact path='/utstyr' component={Utstyr} />
-        <Route exact path='/info' component={Info} />
         <Route exact path='/tur/:turId' component={TurDetails} />
       </Switch>
     </div>
