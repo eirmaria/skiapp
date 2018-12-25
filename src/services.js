@@ -177,7 +177,7 @@ class Service {
   }
   getAvgVaer() {
     return new Promise((resolve, reject) => {
-      connection.query('SELECT s.sted_navn AS sted, AVG(v.nedbor_mm) AS nedbor, AVG(v.temperatur) AS temperatur, AVG(v.vindstyrke_mps) AS vindstyrke FROM ((TUR t INNER JOIN VAER v ON v.tur_id = t.tur_id) INNER JOIN STED s ON s.sted_id = t.sted_id) GROUP BY s.sted_navn', (error, result) => {
+      connection.query('SELECT s.sted_id, s.sted_navn AS sted, AVG(v.nedbor_mm) AS nedbor, AVG(v.temperatur) AS temperatur, AVG(v.vindstyrke_mps) AS vindstyrke FROM ((TUR t INNER JOIN VAER v ON v.tur_id = t.tur_id) INNER JOIN STED s ON s.sted_id = t.sted_id) GROUP BY s.sted_navn, s.sted_id', (error, result) => {
         if (error) {
           reject(error);
           return;
@@ -252,7 +252,7 @@ class Service {
       });
     });
   }
-  insertSkipar(skipar_navn, langrennstype_navn, skimerke_navn, skitype_navn) {
+  insertSkiparByName(skipar_navn, skimerke_navn, skitype_navn, langrennstype_navn) {
     return new Promise((resolve, reject) => {
       connection.query('INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, ?, l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = ? AND sm.skimerke_navn = ? AND st.skitype_navn = ?', [skipar_navn, langrennstype_navn, skimerke_navn, skitype_navn], (error, result) => {
         if (error) {
@@ -260,6 +260,56 @@ class Service {
           return;
         }
         resolve(result);
+        console.log(result);
+      });
+    });
+  }
+  insertSkipar(skipar_navn, skimerke_id, skitype_id, langrennstype_id) {
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) VALUES (NULL, ?, ?, ?, ?) ', [skipar_navn, langrennstype_id, skimerke_id, skitype_id], (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result);
+        console.log(result);
+      });
+    });
+  }
+  insertSted(sted_navn, sted_beskrivelse) {
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO STED (sted_id, sted_navn, sted_beskrivelse) VALUES (NULL, ?, ?) ', [sted_navn, sted_beskrivelse], (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result);
+        console.log(result);
+      });
+    });
+  }
+
+  insertTur(sted_id, lengde, dato, kommentar, skipar_id, skismurning_id) {
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO TUR (tur_id, sted_id, lengde, dato, kommentar, skipar_id, skismurning_id) VALUES (NULL, ?, ?, ?, ?, ?, ?) ', [sted_id, lengde, dato, kommentar, skipar_id, skismurning_id], (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result);
+        console.log(result);
+      });
+    });
+  }
+  insertVaer(temperatur, nedbor_mm, vindstyrke_mps, skylag_id, nedbortype_id) {
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO VAER (vaer_id, tur_id, temperatur, nedbor_mm, vindstyrke_mps, skylag_id, nedbortype_id) VALUES (NULL, NULL, ?, ?, ?, ?, ?) ', [temperatur, nedbor_mm, vindstyrke_mps, skylag_id, nedbortype_id], (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(result);
+        console.log(result);
       });
     });
   }

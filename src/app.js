@@ -24,7 +24,6 @@ class ErrorMessage extends React.Component {
   }
 }
 let errorMessage;
-
 class Menu extends React.Component {
   render() {
     return (
@@ -34,18 +33,6 @@ class Menu extends React.Component {
     );
   }
 }
-
-// class Hjem extends React.Component {
-//   render() {
-//     return (
-//       <div>
-//         Hjemmeside
-//       </div>
-//     );
-//   }
-// }
-
-
 class Tur extends React.Component {
   constructor() {
     super(); // Call React.Component constructor
@@ -112,6 +99,9 @@ class Tur extends React.Component {
             <td> <select ref='loype'><option value='0'>Velg sted</option>{sted}</select> </td>
           </tr>
           <tr>
+          <td>Kommentar: </td><td><textarea ref='kommentar'></textarea></td>
+          </tr>
+          <tr>
           <td>Lengde: </td><td><input type='number' ref='lengde' /> i km. </td>
           </tr>
           <tr>
@@ -141,19 +131,15 @@ class Tur extends React.Component {
         </tbody>
         </table>
 
-          <button onClick={ () => {
-            console.log(this.refs.loype.value, this.refs.lengde.value, this.refs.dato.value, this.refs.par.value, this.refs.smor.value, this.refs.temp.value, this.refs.nedbormm.value, this.refs.vind.value, this.refs.sky.value, this.refs.ned.value);
-          }}>Legg til</button>
+          <button ref='nyTurButton'>Legg til</button>
         </div>
       </div>
     );
   }
-
-  // Called after render() is called for the first time
   componentDidMount() {
     service.getTur().then((result) => {
       this.trips = result;
-      this.forceUpdate(); // Rerender component with updated data
+      this.forceUpdate();
     }).catch((error) => {
       errorMessage.set('Failed to get tur: ' + error);
     });
@@ -187,11 +173,38 @@ class Tur extends React.Component {
     }).catch((error) => {
       errorMessage.set('Failed to get nedbørtype: ' + error);
     });
-  }
 
-  // this.refs.newTripButton.onclick = () => {
-  // console.log(this.refs.loype.value);
-  // }
+    this.refs.nyTurButton.onclick = () => {
+      console.log(this.refs.loype.value, this.refs.lengde.value, this.refs.dato.value, this.refs.par.value, this.refs.smor.value, this.refs.temp.value, this.refs.nedbormm.value, this.refs.vind.value, this.refs.sky.value, this.refs.ned.value);
+      service.insertTur(this.refs.loype.value, this.refs.lengde.value, this.refs.dato.value, this.refs.kommentar.value, this.refs.par.value, this.refs.smor.value).then((result) => {
+        console.log(result);
+        service.insertVaer(this.refs.temp.value, this.refs.nedbormm.value, this.refs.vind.value, this.refs.sky.value, this.refs.ned.value).then((result) => {
+          console.log(result);
+          service.getTur().then((result) => {
+            this.trips = result;
+            this.refs.loype.value = 0;
+            this.refs.lengde.value = "";
+            this.refs.dato.value = "";
+            this.refs.par.value = 0;
+            this.refs.smor.value = 0;
+            this.refs.temp.value = "";
+            this.refs.nedbormm.value = "";
+            this.refs.vind.value = "";
+            this.refs.sky.value = 0;
+            this.refs.ned.value = 0;
+            this.refs.kommentar.value = "";
+            this.forceUpdate();
+          }).catch((error) => {
+            errorMessage.set('Failed to get tur: ' + error);
+          });
+        }).catch((error) => {
+          errorMessage.set('Failed to insert vær: ' + error);
+        });
+      }).catch((error) => {
+        errorMessage.set('Failed to insert tur: ' + error);
+      });
+    }
+  }
 }
 class TurDetails extends React.Component {
   constructor(props) {
@@ -287,6 +300,21 @@ class Sted extends React.Component {
     }).catch((error) => {
       errorMessage.set('Failed to get places: ' + error);
     });
+
+    this.refs.addPlaceButton.onclick = () => {
+      service.insertSted(this.refs.snavn.value, this.refs.beskrivelse.value).then((result) => {
+        this.refs.snavn.value = '';
+        this.refs.beskrivelse.value = '';
+        service.getSted().then((result) => {
+          this.places = result;
+          this.forceUpdate();
+        }).catch((error) => {
+          errorMessage.set('Failed to get places: ' + error);
+        });
+    }).catch((error) => {
+      errorMessage.set('Failed to add new place: ' + error);
+    });
+    }
   }
 }
 class Utstyr extends React.Component {
@@ -335,13 +363,26 @@ class Utstyr extends React.Component {
       <br/> <select ref='newBrand'><option value='0'>Skimerke</option>{merke}</select>
       <select ref='newType'><option value='0'>Skitype</option>{skitype}</select>
       <select ref='newStyle'><option value='0'>Langrennstype</option>{stil}</select>
-      <br/><button ref='newSkiButton' onClick={ () => {
-        console.log(this.refs.newSkiName.value, this.refs.newBrand.value, this.refs.newType.value, this.refs.newStyle.value);
-      }}>Lagre</button>
+      <br/><button ref='newSkiButton'>Lagre</button>
       </div>
     );
   }
+  update(){
+    service.getSkipar().then((result) => {
+      this.skis = result;
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get skis: ' + error);
+    });
+  }
   componentDidMount(){
+    this.refs.newSkiButton.onclick = () => {
+      service.insertSkipar(this.refs.newSkiName.value, this.refs.newBrand.value, this.refs.newType.value, this.refs.newStyle.value).then((result) => {
+        this.update();
+      }).catch((error) => {
+        errorMessage.set('Failed to insert new skis: ' + error);
+    });
+  }
     service.getSkipar().then((result) => {
       this.skis = result;
       this.forceUpdate();
@@ -386,7 +427,7 @@ class Hjem extends React.Component {
     let vaerTable = [];
     for (let v of this.vaer) {
       vaerTable.push(
-        <tr>
+        <tr key={v.sted_id}>
         <td>{v.sted}</td>
         <td>{v.nedbor}</td>
         <td>{v.temperatur}</td>
