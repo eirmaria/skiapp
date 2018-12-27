@@ -8,22 +8,38 @@ class ErrorMessage extends React.Component {
     super();
     errorMessage = this;
     this.message='';
+    this.state = {
+      displayValue: 'none'
+    }
   }
 
   render() {
     return (
-      <div>
+      <div style={{display: this.state.displayValue}}>
         <b><font color='red'>{this.message}</font></b>
+        <button ref='closeButton'>Close</button>
       </div>
     );
   }
-
+  componentDidMount() {
+    errorMessage = this;
+    this.refs.closeButton.onclick = () => {
+      this.message = '';
+      this.setState({displayValue: 'none'});
+      this.forceUpdate();
+    };
+  }
+  componentWillUnmount() {
+    errorMessage = null;
+  }
   set(message) {
     this.message = message;
+    this.setState({displayValue: 'inline'});
     this.forceUpdate();
   }
 }
 let errorMessage;
+
 class Menu extends React.Component {
   render() {
     return (
