@@ -9,6 +9,19 @@ function connect() {
     password: 'PiFHWdUd',
     database: 'eirmh'
   });
+  // connection = mysql.createConnection({
+  //   host: '35.187.20.13',
+  //   user: 'root',
+  //   password: 'tihldekaffe',
+  //   database: 'SKIDATABASE'
+  // });
+  // connection = mysql.createConnection({
+  //   host: '32.240.67.138',
+  //   user: 'root',
+  //   password: 'hyttelivet123',
+  //   database: 'Skidatabase'
+  // });
+
 
   // Connect to MySQL-server
   connection.connect((error) => {
@@ -28,6 +41,19 @@ function connect() {
 connect();
 
 class Service {
+  // createTable() {
+  //   return new Promise((resolve, reject) => {
+  //     connection.query('CREATE TABLE NEDBORTYPE ( nedbortype_id INT NOT NULL AUTO_INCREMENT, nedbortype_navn VARCHAR(255) NOT NULL, CONSTRAINT nedbortypePK PRIMARY KEY (nedbortype_id) )', (error, result) => {
+  //       if(error) {
+  //         reject(error);
+  //         return;
+  //       }
+  //       resolve(result);
+  //       console.log(result);
+  //     });
+  //   });
+  // }
+
   getTur() {
     return new Promise((resolve, reject) => {
       connection.query('SELECT t.tur_id, t.dato, t.lengde, s.sted_navn, t.sted_id, p.skipar_navn, t.skipar_id, m.skismurning_navn, t.skismurning_id, t.kommentar, v.temperatur, v.nedbor_mm, v.vindstyrke_mps, n.nedbortype_navn, v.nedbortype_id, y.skylag_navn, v.skylag_id FROM ((((((TUR t INNER JOIN VAER v ON v.tur_id = t.tur_id) INNER JOIN STED s ON s.sted_id = t.sted_id) INNER JOIN SKIPAR p ON p.skipar_id = t.skipar_id) INNER JOIN SKISMURNING m ON m.skismurning_id = t.skismurning_id) INNER JOIN NEDBORTYPE n ON n.nedbortype_id = v.nedbortype_id) INNER JOIN SKYLAG y ON y.skylag_id = v.skylag_id) ORDER BY t.dato', (error, result) => {

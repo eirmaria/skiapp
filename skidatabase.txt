@@ -1,0 +1,58 @@
+﻿CREATE TABLE SKYLAG ( skylag_id INT NOT NULL AUTO_INCREMENT, skylag_navn VARCHAR(255) NOT NULL, CONSTRAINT skylagPK PRIMARY KEY (skylag_id) ); 
+
+CREATE TABLE NEDBORTYPE ( nedbortype_id INT NOT NULL AUTO_INCREMENT, nedbortype_navn VARCHAR(255) NOT NULL, CONSTRAINT nedbortypePK PRIMARY KEY (nedbortype_id) ); 
+
+CREATE TABLE LANGRENNSTYPE ( langrennstype_id INT NOT NULL AUTO_INCREMENT, langrennstype_navn VARCHAR(255) NOT NULL,  CONSTRAINT langrennstypePK PRIMARY KEY (langrennstype_id) ); 
+
+CREATE TABLE SKIMERKE ( skimerke_id INT NOT NULL AUTO_INCREMENT, skimerke_navn VARCHAR(255) NOT NULL, CONSTRAINT skimerkePK PRIMARY KEY (skimerke_id) ); 
+
+CREATE TABLE SKITYPE ( skitype_id INT NOT NULL AUTO_INCREMENT, skitype_navn VARCHAR(255) NOT NULL, CONSTRAINT skitypePK PRIMARY KEY (skitype_id) ); 
+
+CREATE TABLE SKISMURNING ( skismurning_id INT NOT NULL AUTO_INCREMENT, skismurning_navn VARCHAR(255) NOT NULL, CONSTRAINT skismurningPK PRIMARY KEY (skismurning_id) ); 
+
+CREATE TABLE SKIPAR ( skipar_id INT NOT NULL AUTO_INCREMENT, skipar_navn VARCHAR(255) NOT NULL, skimerke_id INT NOT NULL, skitype_id INT NOT NULL, langrennstype_id INT NOT NULL, CONSTRAINT skiparPK PRIMARY KEY (skipar_id), CONSTRAINT skiparmerkeFK FOREIGN KEY (skimerke_id) REFERENCES SKIMERKE(skimerke_id), CONSTRAINT skiparskitypeFK FOREIGN KEY (skitype_id) REFERENCES SKITYPE(skitype_id), CONSTRAINT skiparlangrennstypeFK FOREIGN KEY (langrennstype_id) REFERENCES LANGRENNSTYPE(langrennstype_id) ); 
+  
+
+CREATE TABLE STED ( sted_id INT NOT NULL AUTO_INCREMENT, sted_navn VARCHAR(255) NOT NULL, 
+sted_beskrivelse VARCHAR(250),
+FULLTEXT fulltext_sted (sted_beskrivelse),
+CONSTRAINT stedPK PRIMARY KEY (sted_id));
+
+CREATE TABLE TUR ( tur_id INT NOT NULL AUTO_INCREMENT, dato DATE DEFAULT NULL, lengde INT NOT NULL, kommentar VARCHAR(250) NULL, sted_id INT NOT NULL, skipar_id INT NOT NULL, skismurning_id INT NOT NULL, CONSTRAINT turPK PRIMARY KEY (tur_id), FULLTEXT fulltext_kommentar (kommentar), CONSTRAINT turskiparFK FOREIGN KEY (skipar_id) REFERENCES SKIPAR (skipar_id), CONSTRAINT turskismurningFK FOREIGN KEY (skismurning_id) REFERENCES SKISMURNING (skismurning_id), CONSTRAINT turstedFK FOREIGN KEY (sted_id) REFERENCES STED (sted_id) ); 
+ 
+CREATE TABLE VAER ( vaer_id INT NOT NULL AUTO_INCREMENT, temperatur INT NOT NULL, nedbor_mm INT DEFAULT 0, vindstyrke_mps INT DEFAULT 0, nedbortype_id INT NOT NULL, skylag_id INT NOT NULL, tur_id INT NOT NULL, CONSTRAINT vaerPK PRIMARY KEY (vaer_id), CONSTRAINT vaernedbortypeFK FOREIGN KEY (nedbortype_id) REFERENCES NEDBORTYPE(nedbortype_id), CONSTRAINT vaerskylagFK FOREIGN KEY (skylag_id) REFERENCES SKYLAG(skylag_id),
+CONSTRAINT vaerturFK FOREIGN KEY (tur_id) REFERENCES TUR(tur_id) );
+
+DELIMITER // CREATE TRIGGER defaultTurID BEFORE INSERT ON VAER FOR EACH ROW BEGIN   IF NEW.tur_id IS NULL THEN     SET NEW.tur_id = LAST_INSERT_ID();    END IF; END; // DELIMITER ; 
+
+
+INSERT INTO LANGRENNSTYPE VALUES (NULL, ‘Skøyting’), (NULL, ‘Klassisk’), (NULL, ‘Turski’); 
+ 
+INSERT INTO SKIMERKE VALUES (NULL, 'Madshus'), (NULL, 'Fischer'), (NULL, 'Atomic'), (NULL, 'Landsem'), (NULL, 'Rossignol'); 
+ 
+ 
+INSERT INTO SKITYPE VALUES (NULL, 'Felleski'), (NULL, 'Zero'), (NULL, 'Cold'), (NULL, 'Wet'); 
+ 
+INSERT INTO SKISMURNING VALUES (NULL, 'Gul'), (NULL, 'Rød'), (NULL, 'Rosa'), (NULL, 'Blå'), (NULL, 'Lilla'), (NULL, 'Grønn'), (NULL, 'Klister'); 
+ 
+INSERT INTO STED VALUES (NULL, 'Jervskogen'), (NULL, 'Selbuskogen'), (NULL, 'Damtjønna'), (NULL, 'Estenstadmarka'), (NULL, 'Vulusjøen'), (NULL, 'Vardebu'); 
+ 
+INSERT INTO `NEDBORTYPE` (`nedbortype_id`, `nedbortype_navn`) VALUES (NULL, 'Ingen'), (NULL, 'Regn'), (NULL, 'Våtsnø'), (NULL, 'Tørrsnø'); 
+ 
+INSERT INTO `SKYLAG` (`skylag_id`, `skylag_navn`) VALUES (NULL, 'Skyfritt'), (NULL, 'Lettskyet'), (NULL, 'Skyet'), (NULL, 'Overskyet'); 
+ 
+INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, 'Godparet', l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = 'Klassisk' AND sm.skimerke_navn = 'Madshus' AND st.skitype_navn = 'Cold'; 
+ 
+INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, 'Zeroskia', l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = 'Klassisk' AND sm.skimerke_navn = 'Madshus' AND st.skitype_navn = 'Zero'; 
+ 
+INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, 'Fjellskia', l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = 'Turski' AND sm.skimerke_navn = 'Fischer' AND st.skitype_navn = 'Cold'; 
+ 
+INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, 'Skateskia', l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = 'Skøyting' AND sm.skimerke_navn = 'Fischer' AND st.skitype_navn = 'Cold';  
+ 
+INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, 'Birkebeinerskia', l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = 'Klassisk' AND sm.skimerke_navn = 'Madshus' AND st.skitype_navn = 'Felleski'; 
+ 
+INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, 'Atomic', l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = 'Klassisk' AND sm.skimerke_navn = 'Atomic' AND st.skitype_navn = 'Felleski'; 
+ 
+INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, 'Gruskia', l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = 'Klassisk' AND sm.skimerke_navn = 'Landsem' AND st.skitype_navn = 'Wet'; 
+ 
+INSERT INTO SKIPAR (skipar_id, skipar_navn, langrennstype_id, skimerke_id, skitype_id) SELECT NULL, 'Ask sine', l.langrennstype_id, sm.skimerke_id, st.skitype_id FROM LANGRENNSTYPE l, SKIMERKE sm, SKITYPE st WHERE l.langrennstype_navn = 'Skøyting' AND sm.skimerke_navn = 'Rossignol' AND st.skitype_navn = 'Cold'; 

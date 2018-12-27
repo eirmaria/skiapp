@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Link, HashRouter, Switch, Route } from 'react-router-dom';
@@ -340,12 +341,19 @@ class Utstyr extends React.Component {
     this.brands = [];
     this.types = [];
     this.styles = [];
+    this.smurninger = [];
   }
   render() {
     let listItems = [];
     for (let ski of this.skis) {
       listItems.push(
         <li key={ski.skipar_id}>{ski.skipar_navn} </li>
+      );
+    }
+    let listItems2 = [];
+    for (let smurning of this.smurninger) {
+      listItems2.push(
+        <li key={smurning.skismurning_id}>{smurning.skismurning_navn} </li>
       );
     }
     let merke = [];
@@ -380,6 +388,22 @@ class Utstyr extends React.Component {
       <select ref='newType'><option value='0'>Skitype</option>{skitype}</select>
       <select ref='newStyle'><option value='0'>Langrennstype</option>{stil}</select>
       <br/><button ref='newSkiButton'>Lagre</button>
+      <br/> <br/>
+      Legg til: <select ref='selectNew'>
+      <option value="0">Velg</option>
+      <option value="1">Skimerke</option>
+      <option value="2">Skitype</option>
+      <option value="3">Langrennstype</option>
+      <option value="4">Skismurning</option>
+
+      </select>
+      <input type='text' ref='inputNewSelected' />
+      <button ref='newSelectedButton'>Lagre</button>
+      <br/>
+      <b>Skismurninger:</b>
+      <ul>
+      {listItems2}
+      </ul>
       </div>
     );
   }
@@ -397,8 +421,79 @@ class Utstyr extends React.Component {
         this.update();
       }).catch((error) => {
         errorMessage.set('Failed to insert new skis: ' + error);
+      });
+    }
+    this.refs.newSelectedButton.onclick = () => {
+      if (this.refs.selectNew.value == 0) {
+          errorMessage.set('Vennligst velg skimerke, skitype eller langrennstype.');
+      } else if (this.refs.selectNew.value == 1) {
+        console.log('skimerke');
+        service.insertSkimerke(this.refs.inputNewSelected.value).then((result) => {
+          console.log(result);
+          service.getSkimerke().then((result) => {
+            this.brands = result;
+            this.refs.inputNewSelected.value = "";
+            this.refs.selectNew.value = "0";
+            this.forceUpdate();
+          }).catch((error) => {
+            errorMessage.set('Failed to get brands: ' + error);
+          });
+        }).catch((error) => {
+          errorMessage.set('Failed to insert new skimerke: ' + error);
+        });
+      } else if (this.refs.selectNew.value == 2) {
+        console.log('skitype');
+        service.insertSkitype(this.refs.inputNewSelected.value).then((result) => {
+          console.log(result);
+          service.getSkitype().then((result) => {
+            this.types = result;
+            this.refs.inputNewSelected.value = "";
+            this.refs.selectNew.value = "0";
+            this.forceUpdate();
+          }).catch((error) => {
+            errorMessage.set('Failed to get types: ' + error);
+          });
+         }).catch((error) => {
+            errorMessage.set('Failed to insert new skitype: ' + error);
+        });
+      } else if (this.refs.selectNew.value == 3) {
+        console.log('langrennstype');
+        service.insertLangrennstype(this.refs.inputNewSelected.value).then((result) => {
+          console.log(result);
+          service.getLangrennstype().then((result) => {
+            this.styles = result;
+            this.refs.inputNewSelected.value = "";
+            this.refs.selectNew.value = "0";
+            this.forceUpdate();
+          }).catch((error) => {
+            errorMessage.set('Failed to get styles: ' + error);
+          });
+         }).catch((error) => {
+          errorMessage.set('Failed to insert new langrennstype: ' + error);
+        });
+      } else if (this.refs.selectNew.value == 4) {
+        console.log('skismurning');
+        service.insertSkismurning(this.refs.inputNewSelected.value).then((result) => {
+          console.log(result);
+          service.getSkismurning().then((result) => {
+            this.smurninger = result;
+            this.refs.inputNewSelected.value = "";
+            this.refs.selectNew.value = "0";
+            this.forceUpdate();
+          }).catch((error) => {
+            errorMessage.set('Failed to get skismurninger: ' + error);
+          });
+         }).catch((error) => {
+          errorMessage.set('Failed to insert new skismurning: ' + error);
+        });
+      }
+    }
+    service.getSkismurning().then((result) => {
+      this.smurninger = result;
+      this.forceUpdate();
+    }).catch((error) => {
+      errorMessage.set('Failed to get skismurninger: ' + error);
     });
-  }
     service.getSkipar().then((result) => {
       this.skis = result;
       this.forceUpdate();
